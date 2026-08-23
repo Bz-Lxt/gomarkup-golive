@@ -31,20 +31,14 @@ func (r *Room) Join(s Sink) {
 
 func (r *Room) Leave(id string) {
 	r.mu.Lock()
-	r.peers[id] = nil
+	delete(r.peers, id)
 	r.mu.Unlock()
 }
 
 func (r *Room) Size() int {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	n := 0
-	for _, peer := range r.peers {
-		if peer != nil {
-			n++
-		}
-	}
-	return n
+	return len(r.peers)
 }
 
 // Fanout delivers a copy to every peer except origin.
@@ -53,7 +47,7 @@ func (r *Room) Fanout(origin string, it scheduler.Item) int {
 	defer r.mu.RUnlock()
 	n := 0
 	for id, s := range r.peers {
-		if id == origin {
+		if id == origin || s == nil {
 			continue
 		}
 		cp := it
@@ -69,7 +63,7 @@ func (r *Room) Echo(origin string, it scheduler.Item) bool {
 	r.mu.RLock()
 	s, ok := r.peers[origin]
 	r.mu.RUnlock()
-	if !ok {
+	if !ok || s == nil {
 		return false
 	}
 	return s.Enqueue(it)
