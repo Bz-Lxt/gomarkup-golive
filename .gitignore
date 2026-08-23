@@ -1,0 +1,51 @@
+# Binaries
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+/server
+/golive
+
+# Go
+vendor/
+*.test
+*.out
+coverage.html
+
+# Node
+node_modules/
+frontend-user/dist/
+frontend-user/.vite/
+*.tsbuildinfo
+
+# Generated certs (never commit — 13-day validity + private key)
+certs/
+*.pem
+*.key
+*.crt
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs / qlog
+*.log
+*.qlog
+qlog/
+
+# Test artifacts
+playwright-report/
+test-results/
+coverage/
+
+# Docker leftover
+dist/
