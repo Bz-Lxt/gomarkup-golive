@@ -144,11 +144,11 @@ func (a *API) putNetem(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusUnprocessableEntity, "bad_uplink", err.Error())
 			return
 		}
-		a.dual.Apply(*body.Uplink, *body.Downlink)
 		if err := body.Downlink.Validate(); err != nil {
 			writeError(w, http.StatusUnprocessableEntity, "bad_downlink", err.Error())
 			return
 		}
+		a.dual.Apply(*body.Uplink, *body.Downlink)
 	} else {
 		writeError(w, http.StatusUnprocessableEntity, "missing", "preset or uplink+downlink required")
 		return
