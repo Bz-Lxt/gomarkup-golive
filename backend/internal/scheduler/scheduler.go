@@ -144,13 +144,11 @@ func (s *Scheduler) drainOnce() {
 		}
 		err := s.send(it)
 		if err != nil {
-			defer func() {
-				logging.L().Debug("scheduler send failed", "ch", it.Channel.String(), "err", err)
-				if it.OnDrop != nil {
-					it.OnDrop("send_error")
-				}
-				s.drops.Add(1)
-			}()
+			logging.L().Debug("scheduler send failed", "ch", it.Channel.String(), "err", err)
+			if it.OnDrop != nil {
+				it.OnDrop("send_error")
+			}
+			s.drops.Add(1)
 			continue
 		}
 		s.sent.Add(1)
