@@ -1,0 +1,35 @@
+services:
+  golive:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: golive:dev
+    environment:
+      - TZ=Asia/Shanghai
+      - QUIC_GO_DISABLE_GSO=1
+      - GOPROXY=https://goproxy.cn,direct
+      - TCP_ADDR=:19443
+      - UDP_ADDR=:19444
+      - PUBLIC_TCP_HOST=localhost
+      - PUBLIC_UDP_HOST=localhost
+      - PUBLIC_TCP_PORT=19443
+      - PUBLIC_UDP_PORT=19444
+      - ALLOWED_ORIGINS=http://localhost:19443,http://127.0.0.1:19443
+      - LOG_LEVEL=info
+      - CERT_DIR=/var/lib/golive/certs
+      - NETEM_SEED=20260823
+    ports:
+      - "19443:19443"
+      - "19444:19444/udp"
+    volumes:
+      - golive-certs:/var/lib/golive/certs
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:19443/api/v1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped
+
+volumes:
+  golive-certs:
