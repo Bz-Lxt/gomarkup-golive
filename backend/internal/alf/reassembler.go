@@ -114,16 +114,21 @@ func (r *Reassembler) Push(f Frame, now time.Time) (complete Frame, ok bool, err
 		totalLen += len(part)
 		if totalLen > r.maxPay {
 			delete(r.items, k)
+			r.dropped++
 			return Frame{}, false, ErrPayloadTooBig
 		}
 	}
+	// Atomically claim the message: delete the entry from the map while still
+	// holding the lock so that a concurrent retry of the tail fragment cannot
+	// find the same entry and complete a second time. Only the goroutine that
+	// successfully deletes the entry proceeds to assemble and return the frame.
+	delete(r.items, k)
+	// Copy out the payload parts while we still hold the lock; the pending
+	// struct is no longer reachable from r.items so this is safe.
 	payload := make([]byte, 0, totalLen)
-	r.mu.Unlock()
 	for i := uint16(0); i < p.total; i++ {
 		payload = append(payload, p.parts[i]...)
 	}
-	r.mu.Lock()
-	delete(r.items, k)
 	out := Frame{
 		Channel:   f.Channel,
 		Kind:      p.kind,
