@@ -82,8 +82,14 @@ func (s *Scheduler) Enqueue(it Item) bool {
 }
 
 func (s *Scheduler) Run(ctx context.Context) {
-	ctx, cancel := context.WithTimeout(ctx, s.cfg.SessionIdle)
-	defer cancel()
+	// The scheduler must outlive any fixed deadline: an active session
+	// with continuous media flow must keep draining its queues for the
+	// full lifetime of the session. capping Run with a SessionIdle
+	// timeout would stall all downstream sends after exactly that
+	// duration even though frames keep arriving. Session liveness is
+	// governed by the registry reaper (LastActive) and the QUIC
+	// MaxIdleTimeout; the scheduler only stops on context cancellation
+	// or explicit Close.
 	tick := time.NewTicker(2 * time.Millisecond)
 	defer tick.Stop()
 	for {
