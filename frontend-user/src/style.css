@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #070b10;
+  --panel: #0e1620;
+  --cyan: #3ee0c5;
+}
+
+html, body, #app {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body {
+  font-family: Oxanium, sans-serif;
+  background-image:
+    radial-gradient(1200px 600px at 80% -10%, rgba(62, 224, 197, 0.08), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,0.02), transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.012) 3px);
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><polyline points='1,1 6,6 11,1' fill='none' stroke='%23999' stroke-width='1.6'/></svg>");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+}
+
+.scanline {
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(62, 224, 197, 0.03) 3px
+  );
+}
+
+.panel {
+  @apply bg-panel border border-line rounded-xl;
+}
