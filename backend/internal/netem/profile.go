@@ -82,13 +82,15 @@ type Snapshot struct {
 	SwitchedAt int64   `json:"switched_at_ms"`
 }
 
+// Apply replaces both uplink and downlink profiles as a single version.
+// The write lock is held across both fields so a concurrent Snapshot or
+// Apply can never observe a torn state (uplink from one PUT, downlink
+// from another). Each PUT is therefore one atomic version visible to
+// readers — including GET /api/v1/netem.
 func (d *Dual) Apply(up, down Profile) {
 	d.mu.Lock()
-	d.up = up
-	d.mu.Unlock()
-
-	d.mu.Lock()
 	defer d.mu.Unlock()
+	d.up = up
 	d.down = down
 	d.switched = time.Now()
 }
