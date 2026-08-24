@@ -143,11 +143,13 @@ func (s *Scheduler) drainOnce() {
 			return
 		}
 		if err := s.send(it); err != nil {
-			logging.L().Debug("scheduler send failed", "ch", it.Channel.String(), "err", err)
-			if it.Reliable {
-				s.Enqueue(it)
-				return
-			}
+			// The item has already been handed to the transport layer.
+			// A partial write may have reached the wire (e.g. the ALF
+			// length prefix was flushed before a flow-control timeout
+			// on the body), so re-enqueuing would duplicate it.
+			// Drop the item to preserve at-most-once delivery.
+			logging.L().Debug("scheduler send failed, dropping item",
+				"ch", it.Channel.String(), "reliable", it.Reliable, "err", err)
 			if it.OnDrop != nil {
 				it.OnDrop("send_error")
 			}
