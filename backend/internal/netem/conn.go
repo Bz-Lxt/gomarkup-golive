@@ -91,7 +91,13 @@ func (c *Conn) WriteTo(p []byte, addr net.Addr) (int, error) {
 		return c.inner.WriteTo(p, addr)
 	}
 	c.writeDelay.Add(1)
-	cp := p[:len(p):len(p)]
+	// Copy the packet bytes so the delayed write is immune to the
+	// caller reusing or overwriting its buffer after we return. A bare
+	// slice expression (p[:len(p):len(p)]) would still alias the
+	// caller's backing array, causing cross-packet corruption when the
+	// buffer is reused while the write is queued.
+	cp := make([]byte, len(p))
+	copy(cp, p)
 	go func() {
 		time.Sleep(time.Duration(wait) * time.Millisecond)
 		if c.closed.Load() {
